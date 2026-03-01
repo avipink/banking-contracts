@@ -17,6 +17,7 @@ import kotlinx.serialization.Serializable
  * @property holderName Full name of the account holder
  * @property balance Current available balance
  * @property status Current operational status
+ * @property openedAt ISO 8601 timestamp when the account was opened (e.g., "2021-03-15T10:00:00Z")
  */
 @Serializable
 data class AccountSummary(
@@ -24,5 +25,6 @@ data class AccountSummary(
     val accountType: AccountType,
     val holderName: String,
     val balance: MonetaryAmount,
-    val status: AccountStatus
+    val status: AccountStatus,
+    val openedAt: String
 )
