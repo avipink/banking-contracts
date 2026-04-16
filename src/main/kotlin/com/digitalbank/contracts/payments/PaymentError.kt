@@ -51,4 +51,47 @@ sealed class PaymentError {
         val limit: MonetaryAmount,
         val attempted: MonetaryAmount
     ) : PaymentError()
+
+    /**
+     * One or more request fields failed service-layer validation.
+     *
+     * HTTP mapping: 400 Bad Request
+     *
+     * Validation is performed in the service layer (not via Jakarta Validation annotations
+     * on the contract type) to avoid introducing a transitive dependency on the validation
+     * API for all consumers of banking-contracts.
+     *
+     * @property fieldErrors Map of field name to human-readable error message
+     *   (e.g., mapOf("amount" to "must be > 0", "fromAccountId" to "must not be blank"))
+     */
+    data class ValidationFailed(
+        val fieldErrors: Map<String, String>
+    ) : PaymentError()
+
+    /**
+     * The provided idempotency key was already used for a payment request with a
+     * different payload. Per the Stripe idempotency pattern, the same key may only
+     * be reused if the request payload is identical.
+     *
+     * HTTP mapping: 409 Conflict
+     *
+     * @property key The idempotency key that was reused with a conflicting payload
+     */
+    data class IdempotencyKeyReused(
+        val key: String
+    ) : PaymentError()
+
+    /**
+     * The currency of the payment request does not match the currency of the source account.
+     * Multi-currency conversion is not supported on this platform.
+     *
+     * HTTP mapping: 422 Unprocessable Entity
+     *
+     * @property requested The currency code specified in the payment request
+     * @property accountCurrency The currency code of the source account
+     */
+    data class CurrencyMismatch(
+        val requested: String,
+        val accountCurrency: String
+    ) : PaymentError()
 }
